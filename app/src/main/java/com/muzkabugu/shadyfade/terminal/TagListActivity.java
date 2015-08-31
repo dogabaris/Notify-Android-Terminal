@@ -22,7 +22,7 @@ public class TagListActivity extends Activity {
         setContentView(R.layout.activity_list);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        String tagName;
+        final String tagName;
         Bundle extras = getIntent().getExtras();
         tagName = extras.getString("tag");
 
@@ -42,7 +42,41 @@ public class TagListActivity extends Activity {
             }
         });
 
-        Toast.makeText(TagListActivity.this, tagName, Toast.LENGTH_LONG).show();
+        Thread t = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(10000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Global.service.GetNotify(tagName, new Callback<Posts>() {
+                                    @Override
+                                    public void success(Posts posts, Response response) {
+                                        lv_notify = (ListView) findViewById(R.id.lv_notify);
+
+                                        final CustomNotifyListAdapter adapter = new CustomNotifyListAdapter(TagListActivity.this, posts.Posts);
+                                        lv_notify.setAdapter(adapter);
+                                        Toast.makeText(TagListActivity.this, "Refreshed", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void failure(RetrofitError error) {
+                                        Toast.makeText(TagListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        t.start();
     }
+
 
 }

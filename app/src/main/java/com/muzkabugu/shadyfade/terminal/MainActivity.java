@@ -55,9 +55,5 @@ public class MainActivity extends Activity {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-
-
-
     }
 }
